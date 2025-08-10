@@ -1,0 +1,73 @@
+// datasource define a conexão com o banco (PostgreSQL)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")  // Var de ambiente para a URL do banco
+}
+
+// generator define o cliente Prisma (gera tipos TypeScript)
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Modelos (tabelas) - Mantidas as anteriores, adicionada IncomeSource
+
+model User {
+  id        Int      @id @default(autoincrement())  // PK auto-incrementada
+  name      String                                // Nome do usuário
+  email     String   @unique                      // Email único para login
+  password  String                                // Senha hashada (use bcrypt para segurança)
+  createdAt DateTime @default(now())              // Data de criação automática
+  updatedAt DateTime @updatedAt                   // Data de atualização automática
+
+  // Relacionamentos
+  transactions  Transaction[]   // 1:N com Transactions
+  accounts      Account[]       // 1:N com Accounts
+  incomeSources IncomeSource[]  // Novo: 1:N com IncomeSource (fontes de renda recorrentes)
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique  // Ex: "Alimentação", "Salário"
+  type      String            // "income" (renda) ou "expense" (despesa)
+
+  // Relacionamentos
+  transactions Transaction[]  // 1:N com Transactions
+}
+
+model Account {
+  id        Int      @id @default(autoincrement())
+  name      String            // Ex: "Conta Corrente Nubank"
+  balance   Float   @default(0.0)  // Saldo atual (atualizado via triggers ou lógica na API)
+  userId    Int               // FK para User
+
+  // Relacionamentos
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]  // 1:N com Transactions
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  amount      Float             // Valor (positivo para renda, negativo para despesa)
+  description String?           // Descrição opcional
+  date        DateTime @default(now())  // Data da transação
+  userId      Int               // FK para User
+  categoryId  Int               // FK para Category
+  accountId   Int               // FK para Account
+
+  // Relacionamentos
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+  account  Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model IncomeSource {
+  id          Int      @id @default(autoincrement())  // PK auto-incrementada
+  type        String                                // Tipo: "salario", "proventos", "dividendos", "freelancers" etc.
+  amount      Float                                 // Valor mensal esperado (ex: 5000.00 para salário)
+  frequency   String   @default("monthly")          // Frequência: "monthly", "yearly", "quarterly" etc. (default mensal)
+  description String?                               // Descrição opcional (ex: "Salário da empresa X")
+  userId      Int                                   // FK para User
+
+  // Relacionamentos
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)  // Deleção em cascata: se user deletado, fontes também
+}
