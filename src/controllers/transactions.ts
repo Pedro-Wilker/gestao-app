@@ -1,18 +1,23 @@
 import { Request, Response } from 'express';
 import * as transactionService from '../services/transactions';
 
+interface AuthRequest extends Request {
+  user?: { id: number };
+}
+
 interface CreateTransactionInput {
   amount: number;
   description?: string;
   date?: string;
-  category: string;
-  userId: number;
+  categoryId: number;
+  accountId: number;
 }
 
-export async function createTransaction(req: Request, res: Response) {
-  const { amount, description, date, category, userId } = req.body as CreateTransactionInput;
+export async function createTransaction(req: AuthRequest, res: Response) {
+  const data = req.body as CreateTransactionInput;
+  const userId = req.user!.id; // De middleware
   try {
-    const transaction = await transactionService.createTransaction({ amount, description, date, category, userId });
+    const transaction = await transactionService.createTransaction({ ...data, userId });
     res.status(201).json(transaction);
   } catch (error: any) {
     res.status(error.status || 500).json({ error: error.message });
@@ -40,15 +45,9 @@ export async function getTransactionById(req: Request, res: Response) {
 
 export async function updateTransaction(req: Request, res: Response) {
   const { id } = req.params;
-  const { amount, description, date, category, userId } = req.body as Partial<CreateTransactionInput>;
+  const data = req.body as Partial<CreateTransactionInput>;
   try {
-    const transaction = await transactionService.updateTransaction(parseInt(id), {
-      amount,
-      description,
-      date,
-      category,
-      userId
-    });
+    const transaction = await transactionService.updateTransaction(parseInt(id), data);
     res.json(transaction);
   } catch (error: any) {
     res.status(error.status || 500).json({ error: error.message });

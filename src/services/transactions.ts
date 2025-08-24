@@ -6,7 +6,8 @@ interface CreateTransactionInput {
   amount: number;
   description?: string;
   date?: string;
-  category: string;
+  categoryId: number;
+  accountId: number;
   userId: number;
 }
 
@@ -15,25 +16,17 @@ interface TransactionError extends Error {
 }
 
 export async function createTransaction(data: CreateTransactionInput): Promise<Transaction> {
-  if (!data.amount || !data.userId || !data.category) {
-    const error: TransactionError = new Error('Amount, userId e category são obrigatórios');
-    error.status = 400;
-    throw error;
-  }
   try {
     const transaction = await prisma.transaction.create({
       data: {
-        amount: data.amount,
-        description: data.description || '',
-        date: data.date ? new Date(data.date) : new Date(),
-        category: data.category,
-        userId: data.userId
+        ...data,
+        date: data.date ? new Date(data.date) : new Date()
       }
     });
     return transaction;
   } catch (error: any) {
     if (error.code === 'P2003') {
-      const err: TransactionError = new Error('Usuário não encontrado');
+      const err: TransactionError = new Error('ID inválido (user, category ou account)');
       err.status = 400;
       throw err;
     }
@@ -43,14 +36,14 @@ export async function createTransaction(data: CreateTransactionInput): Promise<T
 
 export async function getTransactions(): Promise<Transaction[]> {
   return prisma.transaction.findMany({
-    include: { user: true }
+    include: { user: true, category: true, account: true }
   });
 }
 
 export async function getTransactionById(id: number): Promise<Transaction> {
   const transaction = await prisma.transaction.findUnique({
     where: { id },
-    include: { user: true }
+    include: { user: true, category: true, account: true }
   });
   if (!transaction) {
     const error: TransactionError = new Error('Transação não encontrada');
@@ -65,11 +58,8 @@ export async function updateTransaction(id: number, data: Partial<CreateTransact
     const transaction = await prisma.transaction.update({
       where: { id },
       data: {
-        amount: data.amount,
-        description: data.description,
-        date: data.date ? new Date(data.date) : undefined,
-        category: data.category,
-        userId: data.userId
+        ...data,
+        date: data.date ? new Date(data.date) : undefined
       }
     });
     return transaction;
@@ -79,7 +69,7 @@ export async function updateTransaction(id: number, data: Partial<CreateTransact
       err.status = 404;
       throw err;
     } else if (error.code === 'P2003') {
-      const err: TransactionError = new Error('Usuário não encontrado');
+      const err: TransactionError = new Error('ID inválido (user, category ou account)');
       err.status = 400;
       throw err;
     }
