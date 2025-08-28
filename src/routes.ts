@@ -8,12 +8,10 @@ import { Router } from 'express';
 
    const router = Router();
 
-   // Rotas públicas (registro e login)
-   router.post('/users', createUser); // Registro
-   router.post('/login', loginUser); // Login
+   router.post('/users', createUser); 
+   router.post('/login', loginUser); 
 
-   // Rotas protegidas (aplique middleware)
-   router.use(authMiddleware); // Protege todas abaixo
+   router.use(authMiddleware);
 
    // Usuários protegidos
    router.get('/users', getUsers);
