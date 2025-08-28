@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as transactionService from '../services/transactions';
+import * as transactionService from '../../services/transactions/transactions';
 
 interface AuthRequest extends Request {
   user?: { id: number };

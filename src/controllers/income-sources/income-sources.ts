@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as incomeSourceService from '../services/income-sources';
+import * as incomeSourceService from '../../services/income-sources/income-sources';
 
 interface AuthRequest extends Request {
   user?: { id: number };

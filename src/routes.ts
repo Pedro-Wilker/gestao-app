@@ -1,10 +1,10 @@
 import { Router } from 'express';
    import { authMiddleware } from './middleware/auth';
-   import { createUser, getUsers, getUserById, updateUser, deleteUser, loginUser } from './controllers/users';
-   import { createTransaction, getTransactions, getTransactionById, updateTransaction, deleteTransaction } from './controllers/transactions';
-   import { createCategory, getCategories, getCategoryById, updateCategory, deleteCategory } from "./controllers/categories"
-   import { createAccount, getAccounts, getAccountById, updateAccount, deleteAccount } from './controllers/accounts';
-   import { createIncomeSource, getIncomeSources, getIncomeSourceById, updateIncomeSource, deleteIncomeSource } from "./controllers/income-sources";
+   import { createUser, getUsers, getUserById, updateUser, deleteUser, loginUser } from './controllers/users/users';
+   import { createTransaction, getTransactions, getTransactionById, updateTransaction, deleteTransaction } from './controllers/transactions/transactions';
+   import { createCategory, getCategories, getCategoryById, updateCategory, deleteCategory } from "./controllers/categories/categories"
+   import { createAccount, getAccounts, getAccountById, updateAccount, deleteAccount } from './controllers/accounts/accounts';
+   import { createIncomeSource, getIncomeSources, getIncomeSourceById, updateIncomeSource, deleteIncomeSource } from "./controllers/income-sources/income-sources";
 
    const router = Router();
 

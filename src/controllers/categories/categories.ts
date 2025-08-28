@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as categoryService from '../services/categories';
+import * as categoryService from '../../services/categories/categories';
 
 interface CreateCategoryInput {
   name: string;
